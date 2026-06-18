@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
 V2 — Generatore PDF con modello idraulico/energetico esteso
 per trasferimento di acqua di mare da Tripoli verso il Sahara libico.
