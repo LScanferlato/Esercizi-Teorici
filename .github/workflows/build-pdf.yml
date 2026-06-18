@@ -1,9 +1,12 @@
-name: Build PDF from Python script
+name: Build and Commit PDF
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:   # permette run manuale da GitHub
+    paths:
+      - "**.py"
+      - ".github/workflows/**"
+  workflow_dispatch:
 
 jobs:
   build-pdf:
@@ -12,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # necessario per push
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -26,14 +31,18 @@ jobs:
         run: |
           python genera_pdf_pompaggio_tripoli_sahara_v2.py
 
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pdf-output
-          path: "*.pdf"
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
 
-      - name: Upload charts (debug utile)
-        uses: actions/upload-artifact@v4
-        with:
-          name: charts
-          path: "*.png"
+      - name: Commit and push PDF if changed
+        run: |
+          git add *.pdf || true
+
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica nei PDF"
+          else
+            git commit -m "Auto-generated PDF [skip ci]"
+            git push
+          fi
